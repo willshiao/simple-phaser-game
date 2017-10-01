@@ -7,6 +7,9 @@ let knight;
 let slashButton;
 let swords;
 let swordTime = 0; // Time at which the sword can be used again
+let scoreStr = ' Score: ';
+let scoreText;
+let score = 0;
 
 function preload() {
   game.load.image('sword', 'assets/sword.png');
@@ -18,6 +21,9 @@ function create() {
   game.physics.startSystem(Phaser.Physics.ARCADE);
 
   knight = game.add.sprite(84, game.world.height - 100, 'knight');
+
+  // Score text
+  scoreText = game.add.text(10, 10, scoreStr + score, { font: '16px Times New Roman', fill: '#fff' });
 
   // Runners
   runners = game.add.group();
@@ -111,6 +117,8 @@ function render() {
 
 function collisionHandler(sword, runner) {
   runner.kill();
+  score += 10;
+  scoreText.text = scoreStr + score;
 }
 
 function moveRunners() {
