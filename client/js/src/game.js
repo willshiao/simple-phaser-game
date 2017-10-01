@@ -1,32 +1,36 @@
 'use strict';
 
-const game = new Phaser.Game(800, 600, Phaser.AUTO, 'phaser-example', { preload, create, update });
-let player;
+const game = new Phaser.Game(800, 600, Phaser.AUTO, 'phaser-example', { preload, create, update, render });
+let runner;
 let cursors;
 let knight;
 let slashButton;
 
 function preload() {
-  game.load.spritesheet('player', 'assets/player.png', 32, 48);
+  game.load.spritesheet('runner', 'assets/player.png', 32, 48);
   game.load.spritesheet('knight', 'assets/knight.png', 84, 84);
 }
 
 function create() {
   game.physics.startSystem(Phaser.Physics.ARCADE);
 
-  player = game.add.sprite(32, game.world.height - 150, 'player');
+  runner = game.add.sprite(32, game.world.height - 150, 'runner');
   knight = game.add.sprite(84, game.world.height - 100, 'knight');
 
-  game.physics.arcade.enable(player);
-  // player.body.bounce.y = 0.2;
-  // player.body.gravity.y = 300;
-  player.body.collideWorldBounds = true;
+  game.physics.arcade.enable(runner);
+  // runner.body.bounce.y = 0.2;
+  // runner.body.gravity.y = 300;
+  runner.body.collideWorldBounds = true;
 
-  player.animations.add('left', [0, 1, 2, 3], 10, true);
-  player.animations.add('right', [5, 6, 7, 8], 10, true);
-  player.anchor.setTo(0.5, 0.5);
+  runner.animations.add('left', [0, 1, 2, 3], 10, true);
+  runner.animations.add('right', [5, 6, 7, 8], 10, true);
+  runner.anchor.setTo(0.5, 0.5);
 
+  // The knight
   game.physics.arcade.enable(knight);
+  knight.body.collideWorldBounds = true;
+  knight.body.setSize(30, 80, 26, 2);
+
   knight.animations.add('idle', iRange(0, 3), 15, true);
   knight.animations.add('down', iRange(4, 8), 15, true);
   knight.animations.add('up', iRange(9, 13), 15, true);
@@ -46,7 +50,7 @@ function create() {
 function update() {
   knight.body.velocity.x = 0;
   knight.body.velocity.y = 0;
-  const currentAnim = knight.animations.currentAnim;
+  const { animations: { currentAnim } } = knight;
   // knight.data.facing = 'none';
 
   if(slashButton.isDown && (!currentAnim.name.includes('attack') || currentAnim.isFinished)) {
@@ -72,6 +76,10 @@ function update() {
   } else if(!knight.animations.currentAnim.name.includes('attack')) {
     knight.animations.play('idle');
   }
+}
+
+function render() {
+  game.debug.body(knight, '#ffffff', false);
 }
 
 function slash({ animations, data: { facing } }) {
