@@ -101,6 +101,11 @@ function update() {
 
 function render() {
   game.debug.body(knight, '#ffffff', false);
+  // runners.forEachAlive((runner) => {
+  //   game.debug.spriteInfo(runner);
+  //   game.debug.body(runner);
+  // });
+  // game.debug.
 }
 
 
@@ -112,15 +117,25 @@ function moveRunners() {
   runners.forEachAlive((runner) => {
     if(runner.data.moving === true) return;
     const newX = Math.floor(Math.random() * game.world.width);
+    const newY = Math.floor(Math.random() * game.world.height);
+
+    const dx = (newX - runner.x);
+    const dy = (newY - runner.y);
+
+    const theta = Math.atan2(dy, dx);
 
     const tween = game.add.tween(runner)
-      .to({ x: newX }, 4000);
+      .to({ x: newX, y: newY }, 2000);
     runner.data.moving = true;
-    if(newX > runner.x) {
-      runner.animations.play('right');
-    } else {
+    runner.rotation = theta;
+
+    if(dx < 0) {
       runner.animations.play('left');
+      runner.rotation += Math.PI;
+    } else {
+      runner.animations.play('right');
     }
+
     tween.start();
     tween.onComplete.add(() => {
       runner.animations.stop();
@@ -130,7 +145,7 @@ function moveRunners() {
 }
 
 function spawnRunners() {
-  const NUM_RUNNERS = 5;
+  const NUM_RUNNERS = 10;
   for(let n = 0; n < NUM_RUNNERS; ++n) {
     const runner = runners.create(Math.random() * game.world.width, Math.random() * game.world.height, 'runner');
     runner.anchor.setTo(0.5, 0.5);
@@ -180,4 +195,8 @@ function iRange(start, end) {
 // Generates an array from start (inclusive) to end (exclusive)
 function nRange(start, end) {
   return Array.from({ length: end - start }, (value, key) => key + start);
+}
+
+function toDegrees(radians) {
+  return radians * (180 / Math.PI);
 }
