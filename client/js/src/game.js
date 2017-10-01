@@ -1,7 +1,7 @@
 'use strict';
 
 const game = new Phaser.Game(800, 600, Phaser.AUTO, 'phaser-example', { preload, create, update, render });
-let runner;
+let runners;
 let cursors;
 let knight;
 let slashButton;
@@ -17,17 +17,14 @@ function preload() {
 function create() {
   game.physics.startSystem(Phaser.Physics.ARCADE);
 
-  runner = game.add.sprite(32, game.world.height - 150, 'runner');
   knight = game.add.sprite(84, game.world.height - 100, 'knight');
 
-  game.physics.arcade.enable(runner);
-  // runner.body.bounce.y = 0.2;
-  // runner.body.gravity.y = 300;
-  runner.body.collideWorldBounds = true;
+  // Runners
+  runners = game.add.group();
+  runners.enableBody = true;
+  runners.physicsBodyType = Phaser.Physics.ARCADE;
 
-  runner.animations.add('left', [0, 1, 2, 3], 10, true);
-  runner.animations.add('right', [5, 6, 7, 8], 10, true);
-  runner.anchor.setTo(0.5, 0.5);
+  spawnRunners();
 
   // The knight
   game.physics.arcade.enable(knight);
@@ -52,7 +49,7 @@ function create() {
   swords = game.add.group();
   swords.enableBody = true;
   swords.physicsBodyType = Phaser.Physics.ARCADE;
-  swords.createMultiple(5, 'sword');
+  swords.createMultiple(10, 'sword');
   swords.setAll('scale.x', 0.5);
   swords.setAll('scale.y', 0.5);
   swords.setAll('anchor.x', 0.5);
@@ -100,7 +97,22 @@ function render() {
   game.debug.body(knight, '#ffffff', false);
 }
 
+
+function spawnRunners() {
+  const NUM_RUNNERS = 5;
+  for(let n = 0; n < NUM_RUNNERS; ++n) {
+    const runner = runners.create(Math.random() * game.world.width, Math.random() * game.world.height, 'runner');
+    runner.anchor.setTo(0.5, 0.5);
+    runner.body.collideWorldBounds = true;
+
+    runner.animations.add('left', [0, 1, 2, 3], 10, true);
+    runner.animations.add('right', [5, 6, 7, 8], 10, true);
+  }
+}
+
 function slash({ animations, data: { facing } }) {
+  if(game.time.now <= swordTime) return;
+
   const SWORD_SPEED = 200;
   if(facing === 'up') {
     animations.play('attackUp');
@@ -118,16 +130,14 @@ function slash({ animations, data: { facing } }) {
 }
 
 function fireSword(xOffset, yOffset, xVelocity, yVelocity, angle = 0) {
-  if(game.time.now > swordTime) {
-    const sword = swords.getFirstExists(false);
+  const sword = swords.getFirstExists(false);
 
-    if(sword) {
-      sword.reset(knight.x + xOffset, knight.y + yOffset);
-      sword.body.velocity.x = xVelocity;
-      sword.body.velocity.y = yVelocity;
-      sword.angle = angle;
-      swordTime = game.time.now + 500;
-    }
+  if(sword) {
+    sword.reset(knight.x + xOffset, knight.y + yOffset);
+    sword.body.velocity.x = xVelocity;
+    sword.body.velocity.y = yVelocity;
+    sword.angle = angle;
+    swordTime = game.time.now + 1000;
   }
 }
 
