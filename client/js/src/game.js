@@ -121,7 +121,7 @@ function render() {
 
 
 function collisionHandler(sword, runner) {
-  runner.kill();
+  runner.destroy();
   score += 10;
   scoreText.text = scoreStr + score;
 }
