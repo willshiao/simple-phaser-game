@@ -1,0 +1,9 @@
+{
+	"folders":
+	[
+		{ "path": "./client" },
+		{ "name": "client/js/src", "path": "./client/js/src" },
+		{ "path": "./server" },
+		{ "path": "." }
+	]
+}
