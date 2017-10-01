@@ -92,6 +92,9 @@ function update() {
     knight.animations.play('idle');
   }
 
+  // Update runner positions
+  moveRunners();
+
   // Handle collisions
   game.physics.arcade.overlap(swords, runners, collisionHandler, null, this);
 }
@@ -103,6 +106,27 @@ function render() {
 
 function collisionHandler(sword, runner) {
   runner.kill();
+}
+
+function moveRunners() {
+  runners.forEachAlive((runner) => {
+    if(runner.data.moving === true) return;
+    const newX = Math.floor(Math.random() * game.world.width);
+
+    const tween = game.add.tween(runner)
+      .to({ x: newX }, 4000);
+    runner.data.moving = true;
+    if(newX > runner.x) {
+      runner.animations.play('right');
+    } else {
+      runner.animations.play('left');
+    }
+    tween.start();
+    tween.onComplete.add(() => {
+      runner.animations.stop();
+      runner.data.moving = false;
+    });
+  });
 }
 
 function spawnRunners() {
