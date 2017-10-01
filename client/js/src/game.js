@@ -91,12 +91,19 @@ function update() {
   } else if(!knight.animations.currentAnim.name.includes('attack')) {
     knight.animations.play('idle');
   }
+
+  // Handle collisions
+  game.physics.arcade.overlap(swords, runners, collisionHandler, null, this);
 }
 
 function render() {
   game.debug.body(knight, '#ffffff', false);
 }
 
+
+function collisionHandler(sword, runner) {
+  runner.kill();
+}
 
 function spawnRunners() {
   const NUM_RUNNERS = 5;
