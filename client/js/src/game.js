@@ -5,8 +5,11 @@ let runner;
 let cursors;
 let knight;
 let slashButton;
+let swords;
+let swordTime = 0; // Time at which the sword can be used again
 
 function preload() {
+  game.load.image('sword', 'assets/sword.png');
   game.load.spritesheet('runner', 'assets/player.png', 32, 48);
   game.load.spritesheet('knight', 'assets/knight.png', 84, 84);
 }
@@ -30,7 +33,9 @@ function create() {
   game.physics.arcade.enable(knight);
   knight.body.collideWorldBounds = true;
   knight.body.setSize(30, 80, 26, 2);
+  knight.anchor.setTo(0.5, 0.5);
 
+  // The knight's animations
   knight.animations.add('idle', iRange(0, 3), 15, true);
   knight.animations.add('down', iRange(4, 8), 15, true);
   knight.animations.add('up', iRange(9, 13), 15, true);
@@ -43,6 +48,19 @@ function create() {
 
   knight.animations.play('idle');
 
+  // Swords
+  swords = game.add.group();
+  swords.enableBody = true;
+  swords.physicsBodyType = Phaser.Physics.ARCADE;
+  swords.createMultiple(5, 'sword');
+  swords.setAll('scale.x', 0.5);
+  swords.setAll('scale.y', 0.5);
+  swords.setAll('anchor.x', 0.5);
+  swords.setAll('anchor.y', 0.5);
+  swords.setAll('outOfBoundsKill', true);
+  swords.setAll('checkWorldBounds', true);
+
+  // Controls
   cursors = game.input.keyboard.createCursorKeys();
   slashButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 }
@@ -83,14 +101,33 @@ function render() {
 }
 
 function slash({ animations, data: { facing } }) {
+  const SWORD_SPEED = 200;
   if(facing === 'up') {
     animations.play('attackUp');
+    fireSword(0, 0, 0, -SWORD_SPEED, -90);
   } else if(facing === 'down') {
     animations.play('attackDown');
+    fireSword(0, 0, 0, SWORD_SPEED, 90);
   } else if(facing === 'right') {
     animations.play('attackRight');
+    fireSword(0, 0, SWORD_SPEED, 0);
   } else if(facing === 'left') {
     animations.play('attackLeft');
+    fireSword(0, 0, -SWORD_SPEED, 0, 180);
+  }
+}
+
+function fireSword(xOffset, yOffset, xVelocity, yVelocity, angle = 0) {
+  if(game.time.now > swordTime) {
+    const sword = swords.getFirstExists(false);
+
+    if(sword) {
+      sword.reset(knight.x + xOffset, knight.y + yOffset);
+      sword.body.velocity.x = xVelocity;
+      sword.body.velocity.y = yVelocity;
+      sword.angle = angle;
+      swordTime = game.time.now + 500;
+    }
   }
 }
 
