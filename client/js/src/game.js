@@ -108,9 +108,14 @@ function update() {
 function render() {
   game.debug.body(knight, '#ffffff', false);
   // runners.forEachAlive((runner) => {
-  //   game.debug.spriteInfo(runner);
-  //   game.debug.body(runner);
+    // game.debug.spriteInfo(runner);
+    // game.debug.body(runner);
   // });
+  swords.forEachAlive((sword) => {
+    // game.debug.spriteInfo(sword);
+    game.debug.body(sword);
+    // game.debug.bodyInfo(sword);
+  });
   // game.debug.
 }
 
@@ -170,27 +175,32 @@ function slash({ animations, data: { facing } }) {
   const SWORD_SPEED = 200;
   if(facing === 'up') {
     animations.play('attackUp');
-    fireSword(0, 0, 0, -SWORD_SPEED, -90);
+    fireSword(0, 0, 0, -SWORD_SPEED, facing);
   } else if(facing === 'down') {
     animations.play('attackDown');
-    fireSword(0, 0, 0, SWORD_SPEED, 90);
+    fireSword(0, 0, 0, SWORD_SPEED, facing);
   } else if(facing === 'right') {
     animations.play('attackRight');
-    fireSword(0, 0, SWORD_SPEED, 0);
+    fireSword(0, 0, SWORD_SPEED, 0, facing);
   } else if(facing === 'left') {
     animations.play('attackLeft');
-    fireSword(0, 0, -SWORD_SPEED, 0, 180);
+    fireSword(0, 0, -SWORD_SPEED, 0, facing);
   }
 }
 
-function fireSword(xOffset, yOffset, xVelocity, yVelocity, angle = 0) {
+function fireSword(xOffset, yOffset, xVelocity, yVelocity, direction) {
   const sword = swords.getFirstExists(false);
 
   if(sword) {
     sword.reset(knight.x + xOffset, knight.y + yOffset);
+    sword.angle = 0;
     sword.body.velocity.x = xVelocity;
     sword.body.velocity.y = yVelocity;
-    sword.angle = angle;
+    if(direction === 'up' || direction === 'down') {
+      sword.body.angularVelocity = 960;
+    } else if(direction === 'left') {
+      sword.angle = 180;
+    }
     swordTime = game.time.now + 1000;
   }
 }
@@ -207,4 +217,8 @@ function nRange(start, end) {
 
 function toDegrees(radians) {
   return radians * (180 / Math.PI);
+}
+
+function toRadians(degrees) {
+  return degrees * (Math.PI / 180);
 }
